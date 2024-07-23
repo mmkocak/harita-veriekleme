@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "91213610411",
+    "project_id": "yyu-harita-app",
+    "storage_bucket": "yyu-harita-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:91213610411:android:1b0c6cda9353fa153366ee",
+        "android_client_info": {
+          "package_name": "com.example.harita_uygulama_yyu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiyVu5_YahsiUT3JkiaeSHmESvLLNC8Es"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
