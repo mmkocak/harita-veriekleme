@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:harita_uygulama_yyu/core/services/auth.dart';
 import 'package:harita_uygulama_yyu/feature/color/colors.dart';
 import 'package:harita_uygulama_yyu/feature/screens/login/Strings.dart';
+import 'package:harita_uygulama_yyu/feature/screens/register/register_view.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -173,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 20),
                       MaterialButton(
                         onPressed: () {
-                          
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>  RegisterScreen()));
                         },
                         height: 50,
                         color: orangeShade400,

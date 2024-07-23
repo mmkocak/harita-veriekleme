@@ -2,12 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:harita_uygulama_yyu/core/services/auth.dart';
 import 'package:harita_uygulama_yyu/feature/color/colors.dart';
+import 'package:harita_uygulama_yyu/feature/screens/login/login_screen.dart';
 import 'package:harita_uygulama_yyu/feature/screens/register/StringsRegister.dart';
 
-
-
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+   RegisterScreen({super.key});
 
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -17,15 +16,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailControler = TextEditingController();
   final TextEditingController passwordControler = TextEditingController();
   String? errorMessages;
-  Future<void> createUser() async{
-    try{
-      await Auth().createUser(email: emailControler.text, password: passwordControler.text);
-    }on FirebaseAuthException catch(e){
+  bool _obscureText = true;
+  Future<void> createUser() async {
+    if(passwordControler.text.length <= 6){
       setState(() {
-        errorMessages = e.message; 
+        _showErrorDialog("Parolla En az 6 karakter olmalı");
+      });
+      return;
+    }
+    try {
+      await Auth().createUser(
+          email: emailControler.text, password: passwordControler.text);
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessages = e.message;
       });
     }
   }
+// Show Dialog
+void _showErrorDialog(String? message){
+  showDialog(context: context,
+   builder: (BuildContext context){
+    return AlertDialog(
+      title: const Text("Hata"),
+      content: Text(message ?? "Bilinmeyen bir hata oluştu") ,
+      actions: [
+        TextButton(child: const Text("Tamam"), onPressed: (){
+          Navigator.of(context).pop();
+        }, ),
+      ],
+    );
+   }
+   
+   );
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,8 +124,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   bottom: BorderSide(color: greySheed200),
                                 ),
                               ),
-                              child:  const TextField(
-                                
+                              child: const TextField(
                                 decoration: InputDecoration(
                                   hintText: StringsRegister.username,
                                   hintStyle: TextStyle(color: grey),
@@ -116,7 +139,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   bottom: BorderSide(color: greySheed200),
                                 ),
                               ),
-                              child:  TextField(
+                              child: TextField(
                                 controller: emailControler,
                                 decoration: const InputDecoration(
                                   hintText: StringsRegister.email,
@@ -129,27 +152,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 border: Border(
-                                  bottom: BorderSide(color: greySheed200),
+                                  bottom: BorderSide(color: greySheed200)
                                 ),
                               ),
-                              child:  Row(
+                              child: Row(
                                 children: [
                                   Expanded(
                                     child: TextField(
+
+                                      obscureText: _obscureText,
                                       controller: passwordControler,
-                                      decoration: const InputDecoration(
+                                      decoration: InputDecoration(
                                         hintText: StringsRegister.sifre,
-                                        hintStyle: TextStyle(color: grey),
+                                        hintStyle: const TextStyle(color: grey),
                                         border: InputBorder.none,
+                                        suffixIcon: IconButton(
+                                          icon: Icon(_obscureText
+                                              ? Icons.visibility_off
+                                              : Icons.visibility),
+                                              onPressed: (){
+                                                setState(() {
+                                                  _obscureText = !_obscureText;
+                                                });
+                                              },
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  /*  
-                                  IconButton(
-                                    icon: Icon(Icons.visibility),
-                                    onPressed: () {},
-                                  )
-                                  */
                                 ],
                               ),
                             ),
@@ -157,6 +186,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       const SizedBox(height: 40),
+                      //Kayıt Ol
                       MaterialButton(
                         onPressed: () {
                           createUser();
@@ -177,13 +207,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
+
                       const Text(
                         StringsRegister.hesapvarmi,
                         style: TextStyle(color: grey),
                       ),
+                      //Giriş Yap yönlendir
                       MaterialButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginScreen()));
                         },
                         child: Text(
                           StringsRegister.girisYap,
