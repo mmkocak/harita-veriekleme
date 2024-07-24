@@ -4,9 +4,10 @@ import 'package:harita_uygulama_yyu/core/services/auth.dart';
 import 'package:harita_uygulama_yyu/feature/color/colors.dart';
 import 'package:harita_uygulama_yyu/feature/screens/login/login_screen.dart';
 import 'package:harita_uygulama_yyu/feature/screens/register/StringsRegister.dart';
+import 'package:harita_uygulama_yyu/feature/screens/register/showdialog.dart';
 
 class RegisterScreen extends StatefulWidget {
-   RegisterScreen({super.key});
+  RegisterScreen({super.key});
 
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -18,12 +19,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? errorMessages;
   bool _obscureText = true;
   Future<void> createUser() async {
-    if(passwordControler.text.length <= 6){
+    if (emailControler.text.isEmpty && passwordControler.text.isEmpty) {
       setState(() {
-        _showErrorDialog("Parolla En az 6 karakter olmalı");
+        _showErrorDialog("Lütfen tüm alanları doldurun");
       });
-      return;
-    }
+    } 
+      else if (passwordControler.text.length <= 6) {
+        setState(() {
+          _showErrorDialog("Parolla En az 6 karakter olmalı");
+        });
+        return;
+      }
+     else if (!emailControler.text.contains('@')) {
+        setState(() {
+          _showErrorDialog("Geçerli bir e-posta giriniz");
+        });
+        return;
+      }
+    
+
     try {
       await Auth().createUser(
           email: emailControler.text, password: passwordControler.text);
@@ -31,25 +45,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() {
         errorMessages = e.message;
       });
+      _showErrorDialog(errorMessages ?? "Bir hata oluştu");
     }
   }
+
 // Show Dialog
-void _showErrorDialog(String? message){
-  showDialog(context: context,
-   builder: (BuildContext context){
-    return AlertDialog(
-      title: const Text("Hata"),
-      content: Text(message ?? "Bilinmeyen bir hata oluştu") ,
-      actions: [
-        TextButton(child: const Text("Tamam"), onPressed: (){
-          Navigator.of(context).pop();
-        }, ),
-      ],
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+     builder:(BuildContext context){
+      return  Showdialog(message: message);
+     },
     );
-   }
-   
-   );
-}
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -152,14 +163,12 @@ void _showErrorDialog(String? message){
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 border: Border(
-                                  bottom: BorderSide(color: greySheed200)
-                                ),
+                                    bottom: BorderSide(color: greySheed200)),
                               ),
                               child: Row(
                                 children: [
                                   Expanded(
                                     child: TextField(
-
                                       obscureText: _obscureText,
                                       controller: passwordControler,
                                       decoration: InputDecoration(
@@ -170,11 +179,11 @@ void _showErrorDialog(String? message){
                                           icon: Icon(_obscureText
                                               ? Icons.visibility_off
                                               : Icons.visibility),
-                                              onPressed: (){
-                                                setState(() {
-                                                  _obscureText = !_obscureText;
-                                                });
-                                              },
+                                          onPressed: () {
+                                            setState(() {
+                                              _obscureText = !_obscureText;
+                                            });
+                                          },
                                         ),
                                       ),
                                     ),
