@@ -16,23 +16,24 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailControler = TextEditingController();
   final TextEditingController passwordControler = TextEditingController();
+  final TextEditingController nameControler = TextEditingController();
   String? errorMessages;
   bool _obscureText = true;
   Future<void> createUser() async {
     if (emailControler.text.isEmpty && passwordControler.text.isEmpty) {
       setState(() {
-        _showErrorDialog("Lütfen tüm alanları doldurun");
+        showErrorDialog("Lütfen tüm alanları doldurun");
       });
     } 
       else if (passwordControler.text.length <= 6) {
         setState(() {
-          _showErrorDialog("Parolla En az 6 karakter olmalı");
+          showErrorDialog("Parolla En az 6 karakter olmalı");
         });
         return;
       }
      else if (!emailControler.text.contains('@')) {
         setState(() {
-          _showErrorDialog("Geçerli bir e-posta giriniz");
+          showErrorDialog("Geçerli bir e-posta giriniz");
         });
         return;
       }
@@ -40,17 +41,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       await Auth().createUser(
-          email: emailControler.text, password: passwordControler.text);
+          email: emailControler.text, password: passwordControler.text, name: nameControler.text);
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessages = e.message;
       });
-      _showErrorDialog(errorMessages ?? "Bir hata oluştu");
+      showErrorDialog(errorMessages ?? "Bir hata oluştu");
     }
   }
 
 // Show Dialog
-  void _showErrorDialog(String message) {
+  void showErrorDialog(String message) {
     showDialog(
       context: context,
      builder:(BuildContext context){
@@ -135,8 +136,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   bottom: BorderSide(color: greySheed200),
                                 ),
                               ),
-                              child: const TextField(
-                                decoration: InputDecoration(
+                              child:  TextField(
+                                controller: nameControler,
+                                decoration:const  InputDecoration(
                                   hintText: StringsRegister.username,
                                   hintStyle: TextStyle(color: grey),
                                   border: InputBorder.none,
