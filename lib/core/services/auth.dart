@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:harita_uygulama_yyu/feature/color/colors.dart';
 
 class Auth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -29,6 +31,7 @@ class Auth {
         _registerUser(name: name, email: email, password: password);
       }
     } on FirebaseAuthException catch (e) {
+
       String errorMessages;
       switch (e.code) {
         case 'email-already-in-use':
@@ -39,14 +42,15 @@ class Auth {
           break;
         default:
           errorMessages = 'Bilinmeyen bir hata oluştu.';
-
-          Fluttertoast.showToast(
+      }
+       Fluttertoast.showToast(
             msg: errorMessages,
+            textColor: white,
+            backgroundColor: red,
             toastLength: Toast.LENGTH_LONG,
             gravity: ToastGravity.BOTTOM,
             fontSize: 16.0,
           );
-      }
     }
   }
 

@@ -59,7 +59,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
      },
     );
   }
-
+@override
+void dispose() {
+  emailControler.dispose();
+  passwordControler.dispose();
+  nameControler.dispose();
+  super.dispose();
+}
 
 
   @override
@@ -198,9 +204,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 40),
                       //Kayıt Ol
-                      MaterialButton(
-                        onPressed: () {
-                          createUser();
+                      MaterialButton (
+                        onPressed: () async {
+                         await  createUser();
                         },
                         height: 50,
                         color: orangeShade900,

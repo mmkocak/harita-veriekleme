@@ -9,3 +9,4 @@ final Color greySheed200 = Colors.grey.shade200;
 const Color grey = Colors.grey;
 final  Color? orange900 = Colors.orange[900];
 final  Color? orange400 = Colors.orange[400];
+const Color red = Colors.red;
