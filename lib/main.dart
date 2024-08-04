@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:harita_uygulama_yyu/feature/color/colors.dart';
 import 'package:harita_uygulama_yyu/feature/main/main_text.dart';
 import 'package:harita_uygulama_yyu/feature/screens/login/login_screen.dart';
-import 'package:harita_uygulama_yyu/feature/screens/register/register_view.dart';
 import 'package:harita_uygulama_yyu/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -27,7 +26,7 @@ class MapApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: green,
       ),
-      home: RegisterScreen(),
+      home: const LoginScreen(),
     );
   }
 }

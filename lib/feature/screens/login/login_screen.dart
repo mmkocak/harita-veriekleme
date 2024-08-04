@@ -5,6 +5,7 @@ import 'package:harita_uygulama_yyu/feature/color/colors.dart';
 import 'package:harita_uygulama_yyu/feature/screens/login/Strings.dart';
 import 'package:harita_uygulama_yyu/feature/screens/register/register_view.dart';
 
+import 'package:harita_uygulama_yyu/feature/screens/register/showdialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,15 +20,32 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String? errorMessages;
  Future<void> signin() async{
+  if(emailControler.text.isEmpty & passwordControler.text.isEmpty){
+    showErrorDialog("Lütfen Tüm alanları doldurun");
+  }
   try{
-    await Auth().signin(email: emailControler.text, password: passwordControler.text);
+    await Auth().signin( context:  context, email:  emailControler.text, password: passwordControler.text);
   }on FirebaseException catch(e){
     setState(() {
       errorMessages = e.message;
     });
+    showErrorDialog(errorMessages ?? "Bir Hata oluştu");
   }
  }
-
+   void showErrorDialog(String message) {
+    showDialog(
+      context: context,
+     builder:(BuildContext context){
+      return  Showdialog(message: message);
+     },
+    );
+  }
+@override
+void dispose() {
+    emailControler.dispose();
+    passwordControler.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,8 +171,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 40),
                       MaterialButton(
-                        onPressed: () {
-                          
+                        onPressed: () async{
+                          await signin();
                         },
                         height: 50,
                         color: orangeShade900,

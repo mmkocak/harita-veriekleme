@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:harita_uygulama_yyu/feature/color/colors.dart';
+import 'package:harita_uygulama_yyu/feature/screens/home/home_page.dart';
 
 class Auth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -21,7 +22,8 @@ class Auth {
 
   // Register
   Future<void> createUser(
-      {required String name,
+      {required BuildContext context,
+      required String name,
       required String email,
       required String password}) async {
     try {
@@ -29,13 +31,13 @@ class Auth {
           .createUserWithEmailAndPassword(email: email, password: password);
       if (userCredential.user != null) {
         _registerUser(name: name, email: email, password: password);
+        Navigator.push(context, MaterialPageRoute(builder: (context)=> const  HomePage()));
       }
     } on FirebaseAuthException catch (e) {
-
       String errorMessages;
       switch (e.code) {
         case 'email-already-in-use':
-          errorMessages = "Bu email adresi zaten kullanımda";
+          errorMessages = "Bu email adresi alınamıyor";
           break;
         case 'weak-password':
           errorMessages = 'Parola çok zayıf.';
@@ -43,25 +45,55 @@ class Auth {
         default:
           errorMessages = 'Bilinmeyen bir hata oluştu.';
       }
-       Fluttertoast.showToast(
-            msg: errorMessages,
-            textColor: white,
-            backgroundColor: red,
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.BOTTOM,
-            fontSize: 16.0,
-          );
+      Fluttertoast.showToast(
+        msg: errorMessages,
+        textColor: white,
+        backgroundColor: red,
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
     }
   }
 
   // Login
-  Future<void> signin({required String email, required String password}) async {
-    await _firebaseAuth.signInWithEmailAndPassword(
-        email: email, password: password);
-  }
-
-  // Log Out
-  Future<void> SignOut() async {
-    await _firebaseAuth.signOut();
+  Future<void> signin(
+      {required BuildContext context,
+      required String email,
+      required String password}) async {
+    try {
+      final UserCredential userCredential = await _firebaseAuth
+          .signInWithEmailAndPassword(email: email, password: password);
+      if (userCredential != null) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => const HomePage()));
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessages;
+      switch (e.code) {
+        case 'user-not-found':
+        errorMessages = "Kullanıcı bulunamadı.";
+        break;
+         case 'email-already-in-use':
+        errorMessages = "Bu email adresi alınamıyor";
+        break;
+        case 'weak-password':
+          errorMessages = 'Parola çok zayıf.';
+          break;
+          case 'wrong-password':
+        errorMessages = 'Yanlış parola.';
+        break;
+        default:
+          errorMessages = 'Bilinmeyen bir hata oluştu.';
+      }
+      Fluttertoast.showToast(
+        msg: errorMessages,
+        textColor: white,
+        backgroundColor: red,
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0,
+      );
+    }
   }
 }
