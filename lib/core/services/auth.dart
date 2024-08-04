@@ -31,7 +31,7 @@ class Auth {
           .createUserWithEmailAndPassword(email: email, password: password);
       if (userCredential.user != null) {
         _registerUser(name: name, email: email, password: password);
-        Navigator.push(context, MaterialPageRoute(builder: (context)=> const  HomePage()));
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>   HomePage()));
       }
     } on FirebaseAuthException catch (e) {
       String errorMessages;
@@ -66,7 +66,7 @@ class Auth {
           .signInWithEmailAndPassword(email: email, password: password);
       if (userCredential != null) {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => const HomePage()));
+            context, MaterialPageRoute(builder: (context) =>  HomePage()));
       }
     } on FirebaseAuthException catch (e) {
       String errorMessages;
