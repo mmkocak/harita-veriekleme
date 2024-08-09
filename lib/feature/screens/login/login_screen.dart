@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:harita_uygulama_yyu/core/services/auth.dart';
 import 'package:harita_uygulama_yyu/feature/color/colors.dart';
+import 'package:harita_uygulama_yyu/feature/screens/forgotPassword/forgot_password_page.dart';
 import 'package:harita_uygulama_yyu/feature/screens/login/Strings.dart';
 import 'package:harita_uygulama_yyu/feature/screens/register/register_view.dart';
 
@@ -165,9 +166,11 @@ void dispose() {
                         ),
                       ),
                       const SizedBox(height: 40),
-                      const Text(
-                        StringsLogin.sifremiUnuttum,
-                        style: TextStyle(color: grey),
+                       TextButton(
+                         child: const Text( StringsLogin.sifremiUnuttum, style: TextStyle(color: grey),),
+                         onPressed: () {
+                           Navigator.push(context, MaterialPageRoute(builder: (context)=> ForgotPasswordPage()));
+                         },
                       ),
                       const SizedBox(height: 40),
                       MaterialButton(

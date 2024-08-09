@@ -1,21 +1,15 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-class HomePage extends StatefulWidget {
-   HomePage({ Key? key }) : super(key: key);
 
+class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
-  
 }
-double _originLatitude = 38.4382955939104; // Başlangıç noktası enlemi
-double _originLongitude = 27.141358956227965; // Başlangıç noktası boylamı
-double _destLatitude = 38.422733197746986; // Bitiş noktası enlemi
-double _destLongitude = 27.129490953156576; // Bitiş noktası boylamı
+
 class _HomePageState extends State<HomePage> {
-    PolylinePoints polylinePoints = PolylinePoints();
+  PolylinePoints polylinePoints = PolylinePoints();
   Map<PolylineId, Polyline> polylines = {};
   Map<MarkerId, Marker> markers = {};
   MapType _currentMapType = MapType.normal;
@@ -23,45 +17,52 @@ class _HomePageState extends State<HomePage> {
   int _polylineIdCounter = 1;
   int _markerIdCounter = 1;
 
-  Offset _fabPosition =
-      Offset(20, 20); // FloatingActionButton başlangıç pozisyonu
+  Offset _fabPosition = Offset(20, 20); // FloatingActionButton başlangıç pozisyonu
+
+  double _originLatitude = 38.57595834305205;
+  double _originLongitude = 43.29970046867356;
+  double _destLatitude = 38.575051429138874;
+  double _destLongitude = 43.29670343193504;
+
+  String? _polylineName;
+  double? _distance;
 
   static final CameraPosition _initialCameraPosition = CameraPosition(
-    target: LatLng(_originLatitude, _originLongitude),
+    target: LatLng(38.57595834305205, 43.29970046867356),
     zoom: 15,
   );
 
   @override
-  void initState() {
-    super.initState();
-  }
-  @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
-       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-       ),
-       body: Stack(
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(20),
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+      ),
+      body: Stack(
         children: [
-          GoogleMap(
-             polylines: Set<Polyline>.of(polylines.values),
-            markers: Set<Marker>.of(markers.values),
-            myLocationButtonEnabled: true,
-            mapType: _currentMapType,
-            initialCameraPosition: _initialCameraPosition,
-            tiltGesturesEnabled: true,
-            compassEnabled: true,
-            scrollGesturesEnabled: true,
-            zoomGesturesEnabled: true,
-            onMapCreated: (GoogleMapController controller) {
-              _controller = controller;
-            },
+          FractionallySizedBox(
+            heightFactor: 0.7,
+            child: GoogleMap(
+              polylines: Set<Polyline>.of(polylines.values),
+              markers: Set<Marker>.of(markers.values),
+              myLocationButtonEnabled: true,
+              mapType: _currentMapType,
+              initialCameraPosition: _initialCameraPosition,
+              tiltGesturesEnabled: true,
+              compassEnabled: true,
+              scrollGesturesEnabled: true,
+              zoomGesturesEnabled: true,
+              onMapCreated: (GoogleMapController controller) {
+                _controller = controller;
+              },
+            ),
           ),
           Positioned(
-             bottom: 50,
+            bottom: 150,
             left: 10,
             child: ElevatedButton(
               onPressed: _onSelectPointsButtonPressed,
@@ -90,11 +91,36 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              color: Colors.white,
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (_polylineName != null)
+                    Text(
+                      'Çizgi Adı: $_polylineName',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  if (_distance != null)
+                    Text(
+                      'Mesafe: ${_distance!.toStringAsFixed(2)} km',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                ],
+              ),
+            ),
+          ),
         ],
-       ),
       ),
     );
   }
+
   void _onMapTypeButtonPressed() {
     setState(() {
       _currentMapType = _currentMapType == MapType.normal
@@ -102,7 +128,8 @@ class _HomePageState extends State<HomePage> {
           : MapType.normal;
     });
   }
-    void _onSelectPointsButtonPressed() async {
+
+  void _onSelectPointsButtonPressed() async {
     LatLng? origin = await _selectPoint(context, 'Başlangıç Noktasını Seçin');
     if (origin == null) return;
 
@@ -120,10 +147,18 @@ class _HomePageState extends State<HomePage> {
       _originLongitude = origin.longitude;
       _destLatitude = destination.latitude;
       _destLongitude = destination.longitude;
+      _polylineName = polylineName;
+      _distance = Geolocator.distanceBetween(
+        _originLatitude,
+        _originLongitude,
+        _destLatitude,
+        _destLongitude,
+      ) / 1000; // Mesafeyi kilometre cinsinden hesapla
     });
 
     _getPolyline(polylineName, polylineColor);
   }
+
   Future<LatLng?> _selectPoint(BuildContext context, String title) async {
     LatLng? selectedPoint;
     await showDialog(
@@ -145,7 +180,8 @@ class _HomePageState extends State<HomePage> {
     );
     return selectedPoint;
   }
-   Future<String?> _getPolylineName(BuildContext context) async {
+
+  Future<String?> _getPolylineName(BuildContext context) async {
     String? polylineName;
     await showDialog(
       context: context,
@@ -168,190 +204,181 @@ class _HomePageState extends State<HomePage> {
     );
     return polylineName;
   }
+
   Future<Color?> _getPolylineColor(BuildContext context) async {
     Color? selectedColor;
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Çizgi Rengi Seçin'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.circle, color: Colors.red),
-              title: Text('Kırmızı'),
-              onTap: () {
-                selectedColor = Colors.red;
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.circle, color: Colors.green),
-              title: Text('Yeşil'),
-              onTap: () {
-                selectedColor = Colors.green;
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.circle, color: Colors.blue),
-              title: Text('Mavi'),
-              onTap: () {
-                selectedColor = Colors.blue;
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.circle, color: Colors.yellow),
-              title: Text('Sarı'),
-              onTap: () {
-                selectedColor = Colors.yellow;
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.circle, color: Colors.orange),
-              title: Text('Turuncu'),
-              onTap: () {
-                selectedColor = Colors.orange;
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.circle, color: Colors.purple),
-              title: Text('Mor'),
-              onTap: () {
-                selectedColor = Colors.purple;
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.circle, color: Colors.pink),
-              title: Text('Pembe'),
-              onTap: () {
-                selectedColor = Colors.pink;
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.circle, color: Colors.brown),
-              title: Text('Kahverengi'),
-              onTap: () {
-                selectedColor = Colors.brown;
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.circle, color: Colors.grey),
-              title: Text('Gri'),
-              onTap: () {
-                selectedColor = Colors.grey;
-                Navigator.pop(context);
-              },
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.circle, color: Colors.red),
+                title: Text('Kırmızı'),
+                onTap: () {
+                  selectedColor = Colors.red;
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.circle, color: Colors.green),
+                title: Text('Yeşil'),
+                onTap: () {
+                  selectedColor = Colors.green;
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.circle, color: Colors.blue),
+                title: Text('Mavi'),
+                onTap: () {
+                  selectedColor = Colors.blue;
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.circle, color: Colors.yellow),
+                title: Text('Sarı'),
+                onTap: () {
+                  selectedColor = Colors.yellow;
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.circle, color: Colors.orange),
+                title: Text('Turuncu'),
+                onTap: () {
+                  selectedColor = Colors.orange;
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.circle, color: Colors.purple),
+                title: Text('Mor'),
+                onTap: () {
+                  selectedColor = Colors.purple;
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.circle, color: Colors.pink),
+                title: Text('Pembe'),
+                onTap: () {
+                  selectedColor = Colors.pink;
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.circle, color: Colors.brown),
+                title: Text('Kahverengi'),
+                onTap: () {
+                  selectedColor = Colors.brown;
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.circle, color: Colors.grey),
+                title: Text('Gri'),
+                onTap: () {
+                  selectedColor = Colors.grey;
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
     return selectedColor;
   }
- void _getPolyline(String polylineName, Color polylineColor) async {
+
+  void _getPolyline(String polylineName, Color polylineColor) async {
     List<LatLng> polylineCoordinates = [];
 
     try {
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-          request: PolylineRequest(
-              origin: PointLatLng(_originLatitude, _originLongitude),
-              destination: PointLatLng(_destLatitude, _destLongitude),
-              mode: TravelMode.driving),
-          googleApiKey: "API_KEY");
+        request: PolylineRequest(
+          origin: PointLatLng(_originLatitude, _originLongitude),
+          destination: PointLatLng(_destLatitude, _destLongitude),
+          mode: TravelMode.driving,
+        ),
+        googleApiKey: "AIzaSyD3F26wQhYJ7jMTRuw3rjPTGJlhTUvIhko",
+      );
 
       if (result.points.isNotEmpty) {
         result.points.forEach((PointLatLng point) {
           polylineCoordinates.add(LatLng(point.latitude, point.longitude));
         });
-      } else {
-        print("Hata: ${result.errorMessage}");
-      }
 
-      _addPolyline(polylineCoordinates, polylineName, polylineColor);
+        _addPolyline(polylineCoordinates, polylineName, polylineColor);
+
+        LatLngBounds bounds = LatLngBounds(
+          southwest: LatLng(
+            polylineCoordinates.map((e) => e.latitude).reduce((a, b) => a < b ? a : b),
+            polylineCoordinates.map((e) => e.longitude).reduce((a, b) => a < b ? a : b),
+          ),
+          northeast: LatLng(
+            polylineCoordinates.map((e) => e.latitude).reduce((a, b) => a > b ? a : b),
+            polylineCoordinates.map((e) => e.longitude).reduce((a, b) => a > b ? a : b),
+          ),
+        );
+
+        _controller.animateCamera(
+          CameraUpdate.newLatLngBounds(bounds, 50),
+        );
+
+        _addMarkers(bounds);
+      } else {
+        throw Exception('No points found in the polyline');
+      }
     } catch (e) {
       print("Hata oluştu: $e");
     }
   }
- void _addPolyline(List<LatLng> polylineCoordinates, String polylineName,
-      Color polylineColor) {
-    final PolylineId polylineId = PolylineId("polyline_$_polylineIdCounter");
+
+  void _addPolyline(List<LatLng> polylineCoordinates, String polylineName, Color polylineColor) {
+    final String polylineIdVal = 'polyline_id_$_polylineIdCounter';
     _polylineIdCounter++;
+    final PolylineId polylineId = PolylineId(polylineIdVal);
 
     final Polyline polyline = Polyline(
       polylineId: polylineId,
       color: polylineColor,
       points: polylineCoordinates,
-      width: 8,
-      onTap: () {
-        _showPolylineInfo(polylineName);
-      },
+      width: 5,
     );
 
-    polylines[polylineId] = polyline;
+    setState(() {
+      polylines[polylineId] = polyline;
+    });
+  }
 
-    // Başlangıç noktası markerı
-    final MarkerId startMarkerId = MarkerId("start_marker_$_markerIdCounter");
-    _markerIdCounter++;
-    final Marker startMarker = Marker(
-      markerId: startMarkerId,
-      position: polylineCoordinates.first,
+  void _addMarkers(LatLngBounds bounds) {
+    MarkerId originMarkerId = MarkerId('origin_marker');
+    MarkerId destinationMarkerId = MarkerId('destination_marker');
+
+    Marker originMarker = Marker(
+      markerId: originMarkerId,
+      position: LatLng(_originLatitude, _originLongitude),
+      infoWindow: InfoWindow(title: 'Başlangıç Noktası'),
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-      infoWindow: InfoWindow(title: "Başlangıç Noktası"),
     );
-    markers[startMarkerId] = startMarker;
 
-    // Bitiş noktası markerı
-    final MarkerId endMarkerId = MarkerId("end_marker_$_markerIdCounter");
-    _markerIdCounter++;
-    final Marker endMarker = Marker(
-      markerId: endMarkerId,
-      position: polylineCoordinates.last,
+    Marker destinationMarker = Marker(
+      markerId: destinationMarkerId,
+      position: LatLng(_destLatitude, _destLongitude),
+      infoWindow: InfoWindow(title: 'Bitiş Noktası'),
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      infoWindow: InfoWindow(title: "Bitiş Noktası"),
     );
-    markers[endMarkerId] = endMarker;
 
-    setState(() {});
-  }
-  void _showPolylineInfo(String polylineName) {
-    double totalDistance = _calculateTotalDistance();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(polylineName),
-        content: Text(
-            'Başlangıç ve Bitiş Noktaları Arasındaki Mesafe: ${totalDistance.toStringAsFixed(2)} km'),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text('Tamam'),
-          ),
-        ],
-      ),
-    );
-  }
-    double _calculateTotalDistance() {
-    double totalDistance = 0.0;
-    for (int i = 0; i < polylines.length; i++) {
-      Polyline polyline = polylines.values.elementAt(i);
-      for (int j = 0; j < polyline.points.length - 1; j++) {
-        totalDistance += Geolocator.distanceBetween(
-          polyline.points[j].latitude,
-          polyline.points[j].longitude,
-          polyline.points[j + 1].latitude,
-          polyline.points[j + 1].longitude,
-        );
-      }
-    }
-    return totalDistance / 1000; // Mesafeyi km olarak döndürür
+    setState(() {
+      markers[originMarkerId] = originMarker;
+      markers[destinationMarkerId] = destinationMarker;
+    });
   }
 }
+
+

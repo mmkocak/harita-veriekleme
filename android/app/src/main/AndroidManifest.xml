@@ -3,6 +3,10 @@
         android:label="harita_uygulama_yyu"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+         <!-- Google Maps API Anahtarı -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyD3F26wQhYJ7jMTRuw3rjPTGJlhTUvIhko"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
