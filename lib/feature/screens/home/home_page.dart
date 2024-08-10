@@ -2,13 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:harita_uygulama_yyu/feature/screens/login/login_screen.dart';
+
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
+ 
+
 }
 
 class _HomePageState extends State<HomePage> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // Other variables
   PolylinePoints polylinePoints = PolylinePoints();
   Map<PolylineId, Polyline> polylines = {};
   Map<MarkerId, Marker> markers = {};
@@ -31,6 +42,52 @@ class _HomePageState extends State<HomePage> {
     target: LatLng(38.57595834305205, 43.29970046867356),
     zoom: 15,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+Future<void> _loadUserData() async {
+  User? user = _auth.currentUser;
+  if (user != null) {
+    DocumentSnapshot userDoc =
+        await _firestore.collection('users').doc(user.uid).get();
+
+    if (userDoc.exists) {
+      setState(() {
+        _originLatitude = userDoc['originLatitude'];
+        _originLongitude = userDoc['originLongitude'];
+        _destLatitude = userDoc['destLatitude'];
+        _destLongitude = userDoc['destLongitude'];
+        _polylineName = userDoc['polylineName'];
+        _distance = userDoc['distance'];
+      });
+      _getPolyline(_polylineName!, Colors.blue);
+    }
+  }
+}
+
+
+Future<void> _saveUserData() async {
+  try {
+    User? user = _auth.currentUser;
+    if (user != null) {
+ await _firestore.collection('users').doc(user.uid).set({
+  'originLatitude': _originLatitude,
+  'originLongitude': _originLongitude,
+  'destLatitude': _destLatitude,
+  'destLongitude': _destLongitude,
+  'polylineName': _polylineName,
+  'distance': _distance,
+}, SetOptions(merge: true));
+    }
+  } catch (e) {
+    print('Firestore save error: $e');
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,12 +148,14 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
+          const SizedBox(height: 50,),
+         // Alt buton
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Container(
-              color: Colors.white,
+              color: Colors.red,
               padding: EdgeInsets.all(16.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -118,9 +177,43 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+       floatingActionButton: FloatingActionButton(
+        heroTag: null,
+      onPressed: _showLogoutDialog,
+      child: Icon(Icons.exit_to_app),
+      backgroundColor: Colors.red,
+    ),
     );
   }
+void _showLogoutDialog() {
+  
+  showDialog(
+    
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Hesaptan çıkmak istiyor musunuz?'),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(); // ShowDialog'u kapatır
+          },
+          child: Text('İptal'),
+        ),
+        TextButton(
+          onPressed: () {
+            _loggout(); // Hesaptan çıkış yapar
+          },
+          child: Text('Tamam'),
+        ),
+      ],
+    ),
+  );
+}
 
+Future<void> _loggout() async {
+  await _auth.signOut(); // Firebase'den çıkış yapar
+  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> LoginScreen()));
+}
   void _onMapTypeButtonPressed() {
     setState(() {
       _currentMapType = _currentMapType == MapType.normal
@@ -156,6 +249,7 @@ class _HomePageState extends State<HomePage> {
       ) / 1000; // Mesafeyi kilometre cinsinden hesapla
     });
 
+    await _saveUserData();
     _getPolyline(polylineName, polylineColor);
   }
 
@@ -305,7 +399,7 @@ class _HomePageState extends State<HomePage> {
           destination: PointLatLng(_destLatitude, _destLongitude),
           mode: TravelMode.driving,
         ),
-        googleApiKey: "AIzaSyD3F26wQhYJ7jMTRuw3rjPTGJlhTUvIhko",
+        googleApiKey: "AIzaSyD3F26wQhYJ7jMTRuw3rjPTGJlhTUvIhko", 
       );
 
       if (result.points.isNotEmpty) {
@@ -380,5 +474,3 @@ class _HomePageState extends State<HomePage> {
     });
   }
 }
-
-
