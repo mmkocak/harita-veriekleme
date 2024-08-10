@@ -92,13 +92,6 @@ Future<void> _saveUserData() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(20),
-        child: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        ),
-      ),
       body: Stack(
         children: [
           FractionallySizedBox(
