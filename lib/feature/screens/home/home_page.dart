@@ -392,7 +392,7 @@ Future<void> _loggout() async {
           destination: PointLatLng(_destLatitude, _destLongitude),
           mode: TravelMode.driving,
         ),
-        googleApiKey: "AIzaSyD3F26wQhYJ7jMTRuw3rjPTGJlhTUvIhko", 
+        googleApiKey: "Kendi_Apini_Gir", // => Api gir
       );
 
       if (result.points.isNotEmpty) {

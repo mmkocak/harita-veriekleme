@@ -6,7 +6,7 @@
          <!-- Google Maps API Anahtarı -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyD3F26wQhYJ7jMTRuw3rjPTGJlhTUvIhko"/>
+            android:value="Kendi_Apini_Gir"/> <!-- Kendi Apini Gir-->
         <activity
             android:name=".MainActivity"
             android:exported="true"
