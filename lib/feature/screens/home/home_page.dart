@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:harita_uygulama_yyu/feature/screens/login/login_screen.dart';
@@ -92,6 +91,7 @@ Future<void> _saveUserData() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+     
       body: Stack(
         children: [
           FractionallySizedBox(
